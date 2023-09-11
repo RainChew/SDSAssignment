@@ -2,12 +2,11 @@ data <- read.csv("External_Trade_Data.csv")
 print(data)
 library(forecast)
 library(ggplot2)
-# #Drop Variable
 # data$Exports <- as.numeric(gsub(",", "", data$Exports))
 # data$Imports <- as.numeric(gsub(",", "", data$Imports))
 # data$Total_Trade <- as.numeric(gsub(",", "", data$Total_Trade))
 # data$Balance_of_Trade <- as.numeric(gsub(",", "", data$Balance_of_Trade))
-# 
+# # #Drop Variable
 # # data_ts = subset(data, select = -c(Imports,Total_Trade,Balance_of_Trade,Year))
 # data
 # data <- ts(data, frequency = 1, start =c(1967,1))
