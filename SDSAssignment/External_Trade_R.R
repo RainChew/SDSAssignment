@@ -81,7 +81,7 @@ residual_component <- decomposed$random
 
 # Plot the residuals
 autoplot(residual_component, ylab = "Residuals", main = "Residuals (Random Behavior)")
-
+cbind(decomposed$x,decomposed$trend,decomposed$seasonal,decomposed$random)
 # You can also plot ACF and PACF of residuals to identify any autocorrelation
 acf(residual_component)
 pacf(residual_component)
@@ -101,6 +101,7 @@ plot.ts(y, ylab = "Trade Balance(RM)(millions)",xlab="Years", main = "Monthly Tr
 
 #adf test
 library(tseries)
+
 adf.test(y)
 acf(y)
 pacf(y)
@@ -135,7 +136,10 @@ adf.test_result <- adf.test(differenced_y)
 print(adf.test_result)
 sarima_model <- auto.arima(differenced_y, seasonal = TRUE)
 print(sarima_model)
-checkresiduals(ets_model)
+checkresiduals(sarima_model)
+adf.test(y)
+acf(y)
+pacf(y)
 #step 7
 library(forecast)
 fit <- auto.arima(y)
