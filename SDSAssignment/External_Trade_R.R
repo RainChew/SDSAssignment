@@ -12,7 +12,7 @@ head(df)
 # Rename Period into date
 colnames(df)[colnames(df) == "Period"]<-"date"
 
-# convert date format
+# Convert date format
 df$date<-as.Date(df$date, format="%m/%d/%Y")
 #view again to check character convert to date format
 summary(df)
@@ -30,7 +30,7 @@ head(df)
 summary(df)
 str(df)
 
-# check the duplicated rows
+# check the duplicate rows
 duplicated_rows <- duplicated(df$date)
 sum(duplicated_rows)
 # check the missing value
@@ -101,7 +101,8 @@ pacf(trade_ts)
 
 # If Trade_Balance are
 Y <- df$Trade_Balance
-
+balance_ts_clean = tsclean(balance_ts)
+summary(balance_ts_clean)
 balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
 plot.ts(balance_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
