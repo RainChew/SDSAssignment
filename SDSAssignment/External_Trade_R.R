@@ -28,6 +28,10 @@ head(df)
 
 summary(df)
 str(df)
+
+# check the duplicated rows
+duplicated_rows <- duplicated(df$date)
+sum(duplicated_rows)
 # check the missing value
 is.null(df)
 
@@ -96,6 +100,7 @@ pacf(trade_ts)
 
 # If Trade_Balance are
 Y <- df$Trade_Balance
+
 balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
 plot.ts(balance_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
