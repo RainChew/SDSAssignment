@@ -7,7 +7,6 @@ library(MASS)
 df <- read.csv("External_Trade_Monthly.csv")
 head(df)
 
-
 #numeric
 df$Gross_Exports <- as.numeric(gsub(",", "", df$Gross_Exports))
 df$Gross_Imports <- as.numeric(gsub(",", "", df$Gross_Imports))
@@ -15,10 +14,13 @@ df$Total_Trade <- as.numeric(gsub(",", "", df$Total_Trade))
 df$Trade_Balance <- as.numeric(gsub(",", "", df$Trade_Balance))
 head(df)
 
+#information for the data
 summary(df)
 str(df)
+
 # check the missing value
 is.null(df)
+
 #select columns
 Y <- df$Trade_Balance
 x <- df$Period
@@ -27,10 +29,10 @@ df_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
 plot.ts(df_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Period", main = "Monthly Trade Balance(RM)")
 
 
-
+#Select Period and Trade_Balance into df2
 df2 <- df[,c(1,5)]
 
-# Assuming your data has a 'date' column and a 'trade_value' column
+# Assuming your data has a 'Period' column and a 'Trade_Balance column
 
 # Step 0: Split the Data into Train and Test Sets
 
@@ -55,6 +57,9 @@ print(train_data)
 # Assuming you have already imported and prepared your time series data as 'df'
 
 # Step 1: Decompose the Time Series
+#Select Variable y is Trade Balance and x is Period
+y <- df[,c(5)]
+x <- df[,c(1)]
 y <- ts(y, frequency = 12, start = c(2010, 1))
 decomposed <- decompose(y)
 
@@ -91,9 +96,6 @@ df <- ts(df, frequency = 12, start =c(2010,1) ,end = c(2019,12))
 # df <- log(df)
 plot.ts(df, ylab = "Trade Balance(RM)(millions)", xlab = "Period", main = "Monthly Trade Balance(RM)")
 
-#Drop Variable
-y <- df[,c(5)]
-x <- df[,c(1)]
 
 #show plot
 #y = trade balance
@@ -101,18 +103,18 @@ plot.ts(y, ylab = "Trade Balance(RM)(millions)",xlab="Years", main = "Monthly Tr
 
 #adf test
 library(tseries)
-
 adf.test(y)
 acf(y)
 pacf(y)
 
 #step 2
 # Fit a linear regression model
-model <- lm(y ~ x)
+model <- lm(Y ~ x)
 
 # Find optimal lambda for Box-Cox transformation
 library(MASS)
-bc <- boxcox(y ~ x)
+bc <- boxcox(Y ~ x)
+plot(bc)
 (lambda <- bc$x[which.max(bc$y)])
 
 # Perform the Box-Cox transformation on y
@@ -122,7 +124,7 @@ transformed_y <- (y^lambda - 1) / lambda
 new_model <- lm(transformed_y ~ x)
 #step3 
 library(tseries)
-ndiffs(y)
+ndiffs(y,alpha=0.05,test="adf")
 
 # Apply non-seasonal differencing
 differenced_y <- diff(y, differences = 1)
@@ -134,15 +136,32 @@ plot.ts(differenced_y, ylab = "Differenced Trade Balance(RM)(millions)", xlab = 
 # Perform Augmented Dickey-Fuller test to check for stationarity
 adf.test_result <- adf.test(differenced_y)
 print(adf.test_result)
+
+#arima
+arima_model <- auto.arima(differenced_y)
+checkresiduals(arima_model)
+print(arima_model)
+
+#sarima 
 sarima_model <- auto.arima(differenced_y, seasonal = TRUE)
 print(sarima_model)
 checkresiduals(sarima_model)
-adf.test(y)
-acf(y)
-pacf(y)
+adf.test(differenced_y)
+acf(differenced_y)
+pacf(differenced_y)
+
+#ets
+ets_model<-ets(differenced_y)
+summary(ets_model)
+checkresiduals(ets_model)
+autoplot(ets_model)
+
 #step 7
 library(forecast)
-fit <- auto.arima(y)
+fit <- auto.arima(Y)
 summary(fit)
-auto.arima(y, ic="aic", trace=TRUE)
-
+auto.arima(Y, ic="aic", trace=TRUE)
+autoplot(fit)
+adf.test(Y)
+acf(Y)
+pacf(Y)
