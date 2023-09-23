@@ -5,7 +5,7 @@ library(MASS)
 library(tseries)
 
 
-#step 0
+#step 0 - Read Dataset
 df <- read.csv("External_Trade_Monthly.csv")
 head(df)
 
@@ -121,7 +121,6 @@ autoplot(trend_component, ylab = "Trend", main = "Trend Component")
 # Step 3: Analyze Seasonality
 # Extract the seasonal component from decomposition
 seasonal_component <- decomposed$seasonal
-
 # Plot the seasonal component
 autoplot(seasonal_component, ylab = "Seasonal Component", main = "Seasonal Component")
 decomposition <- decompose(balance_ts, type = "multiplicative")
