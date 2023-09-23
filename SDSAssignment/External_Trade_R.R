@@ -37,7 +37,7 @@ sum(duplicated_rows)
 is.null(df)
 
 df_ts<-ts(df, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(df_ts, xlab = "Period", main = "Monthly Trade Balance(RM)" )
+plot.ts(df_ts, xlab = "Year", main = "Monthly External Trade Data(RM)" )
 #t is Date
 t <- df$date
 # If Gross_Exports are 
@@ -101,9 +101,11 @@ pacf(trade_ts)
 
 # If Trade_Balance are
 Y <- df$Trade_Balance
+balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
+#Check and Remove Outliers
 balance_ts_clean = tsclean(balance_ts)
 summary(balance_ts_clean)
-balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
+summary(balance_ts)
 plot.ts(balance_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
 adf.test(balance_ts)
