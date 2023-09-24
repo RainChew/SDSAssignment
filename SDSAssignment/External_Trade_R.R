@@ -138,6 +138,19 @@ cbind(decomposed$x,decomposed$trend,decomposed$seasonal,decomposed$random)
 # You can also plot ACF and PACF of residuals to identify any autocorrelation
 acf(residual_component)
 pacf(residual_component)
+# Calculate a simple moving average
+# Load the zoo package
+library(zoo)
+
+# Calculate a simple moving average
+ma <- rollmean(Y, k = 12, fill = NA, align = "right")
+
+# Plot the moving average
+plot(ma, main = "Moving Average of Time Series Data")
+
+
+
+
 
 # Check different
 ndiffs(Y)
@@ -173,9 +186,39 @@ ndiffs(diff_Y)
 adf.test(diff_Y)
 acf(diff_Y)
 pacf(diff_Y)
-install.packages("urca")
+# install.packages("urca")
 library(urca)
 kpss_test_result <- ur.kpss(balance_ts, type = "tau")
+kpss_test_result
+
+# Test trend
+# Load necessary libraries
+library(randtests)
+
+# Generate or load your time series data
+# Replace this with your actual time series data
+# For example, you can create a time series using `ts()` or read data from a CSV file.
+# Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
+
+# Perform the Cox-Stuart trend test
+cox_stuart_test_result <- cox.stuart.test(diff_Y)
+
+# Print the test result
+print(cox_stuart_test_result)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Assuming your data has a 'Period' column and a 'Trade_Balance column
 
