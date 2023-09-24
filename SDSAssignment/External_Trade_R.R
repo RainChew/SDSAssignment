@@ -43,18 +43,17 @@ t <- df$date
 # If Gross_Exports are 
 Y <- df$Gross_Exports
 export_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(df_ts, ylab = "Gross Exports(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+plot.ts(export_ts, ylab = "Gross Exports(RM)(millions)", xlab = "Date", main = "Monthly Gross Exports(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
 adf.test(export_ts)
 acf(export_ts)
 pacf(export_ts)
 decomposed <- decompose(df_ts)
 
-
 # If Gross_Imports are 
 Y <- df$Gross_Imports
 import_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(import_ts, ylab = "Gross Imports(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+plot.ts(import_ts, ylab = "Gross Imports(RM)(millions)", xlab = "Date", main = "Monthly Gross Imports(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
 adf.test(import_ts)
 acf(import_ts)
@@ -68,32 +67,10 @@ autoplot(decomposed, main = "Decomposed Components of Time Series")
 # Extract the trend component from decomposition
 trend_component <- decomposed$trend
 
-# Plot the trend component
-autoplot(trend_component, ylab = "Trend", main = "Trend Component")
-
-# Step 3: Analyze Seasonality
-# Extract the seasonal component from decomposition
-seasonal_component <- decomposed$seasonal
-
-# Plot the seasonal component
-autoplot(seasonal_component, ylab = "Seasonal Component", main = "Seasonal Component")
-
-# Step 4: Analyze Residuals (Random Behavior)
-# Extract the residual component from decomposition
-residual_component <- decomposed$random
-
-# Plot the residuals
-autoplot(residual_component, ylab = "Residuals", main = "Residuals (Random Behavior)")
-cbind(decomposed$x,decomposed$trend,decomposed$seasonal,decomposed$random)
-# You can also plot ACF and PACF of residuals to identify any autocorrelation
-acf(residual_component)
-pacf(residual_component)
-
-
 # If Total_Trade are 
 Y <- df$Total_Trade
 trade_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(trade_ts, ylab = "Total Trade(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+plot.ts(trade_ts, ylab = "Total Trade(RM)(millions)", xlab = "Date", main = "Monthly Total Trade(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
 adf.test(trade_ts)
 acf(trade_ts)
@@ -175,8 +152,8 @@ acf(log_Y)
 pacf(log_Y)
 
 #difference
-bc <- boxcox(diff_Y ~ t)
-plot(bc)
+# bc <- boxcox(diff_Y ~ t)
+# plot(bc)
 (lambda <- bc$x[which.max(bc$y)])
 new_model <- lm(((Y^lambda-1)/lambda) ~ t)
 diff_Y <- diff(Y, differences = 1)
@@ -199,16 +176,32 @@ library(randtests)
 # Replace this with your actual time series data
 # For example, you can create a time series using `ts()` or read data from a CSV file.
 # Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
-
+summary(Y)
+summary(diff_Y)
 # Perform the Cox-Stuart trend test
 cox_stuart_test_result <- cox.stuart.test(diff_Y)
 
 # Print the test result
 print(cox_stuart_test_result)
 
+# Load necessary libraries (if not already loaded)
+library(stats)
 
+# Generate or load your time series data
+# Replace this with your actual time series data
+# Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
 
+# Fit a linear regression model
+lm_model <- lm(diff_Y ~ time(diff_Y))
 
+# Check the summary of the regression model
+summary(lm_model)
+
+library(Kendall)
+
+mk_test_result <- MannKendall(Y)
+print(mk_test_result)
+# No trend
 
 
 
