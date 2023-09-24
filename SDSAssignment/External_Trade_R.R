@@ -63,10 +63,6 @@ decomposed <- decompose(import_ts)
 # Plot the decomposed components
 autoplot(decomposed, main = "Decomposed Components of Time Series")
 
-# Step 2: Analyze Trend
-# Extract the trend component from decomposition
-trend_component <- decomposed$trend
-
 # If Total_Trade are 
 Y <- df$Total_Trade
 trade_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
@@ -78,6 +74,7 @@ pacf(trade_ts)
 
 # If Trade_Balance are
 Y <- df$Trade_Balance
+summary(Y)
 balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
 #Check and Remove Outliers
 balance_ts_clean = tsclean(balance_ts)
@@ -90,6 +87,8 @@ acf(balance_ts, lag.max=50, col = "blue")
 pacf(balance_ts , lag=10 , col = "blue")
 ?acf
 ?pacf
+rolling_var <- rollapply(balance_ts, width = 12, FUN = var, by = 1, align = "right", fill = NA)
+plot(rolling_var, ylab = "Rolling Variance", xlab = "Date", main = "Rolling Variance")
 decomposed <- decompose(balance_ts)
 # Step 2: Analyze Trend
 # Extract the trend component from decomposition
