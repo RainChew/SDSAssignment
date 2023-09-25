@@ -83,8 +83,8 @@ summary(balance_ts)
 plot.ts(balance_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
 adf.test(balance_ts)
-acf(balance_ts, lag.max=50, col = "blue")
-pacf(balance_ts , lag=10 , col = "blue")
+acf(balance_ts, lag=24, col = "blue")
+pacf(balance_ts , lag=24 , col = "blue")
 ?acf
 ?pacf
 rolling_var <- rollapply(balance_ts, width = 12, FUN = var, by = 1, align = "right", fill = NA)
@@ -104,7 +104,8 @@ seasonal_component <- decomposed$seasonal
 autoplot(seasonal_component, ylab = "Seasonal Component", main = "Seasonal Component")
 decomposition <- decompose(balance_ts, type = "multiplicative")
 plot(decomposition)
-
+decomposition <- decompose(balance_ts, type = "additive")
+plot(decomposition)
 # Step 4: Analyze Residuals (Random Behavior)
 # Extract the residual component from decomposition
 residual_component <- decomposed$random
@@ -119,15 +120,102 @@ pacf(residual_component)
 library(zoo)
 
 # Calculate a simple moving average
-ma <- rollmean(Y, k = 12, fill = NA, align = "right")
+ma <- rollmean(balance_ts, k = 12, fill = NA, align = "right")
 
 # Plot the moving average
 plot(ma, main = "Moving Average of Time Series Data")
+Y <- balance_ts
+plot.ts(Y, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+ndiffs(Y)
+nsdiffs(Y)
+acf(Y,lag=24)
+pacf(Y,lag=24)
+auto.arima(Y,ic="aic", trace=TRUE)
+checkresiduals(Y,lag = 24)
+# Test trend
+# Load necessary libraries
+library(randtests)
+
+# Generate or load your time series data
+# Replace this with your actual time series data
+# For example, you can create a time series using `ts()` or read data from a CSV file.
+# Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
+summary(Y)
+# Perform the Cox-Stuart trend test
+cox_stuart_test_result <- cox.stuart.test(Y)
+summary(cox_stuart_test_result)
+print(cox_stuart_test_result)
+library(Kendall)
+
+mk_test_result <- MannKendall(Y)
+print(mk_test_result)
+#Differencing
+ndiffs(Y)
+nsdiffs(Y)
+bc <- boxcox(Y ~ t)
+plot(bc)
+(lambda <- bc$x[which.max(bc$y)])
+
+#log
+bc <- boxcox(log_Y ~ t)
+plot(bc)
+(lambda <- bc$x[which.max(bc$y)])
+new_model <- lm(((Y^lambda-1)/lambda) ~ t)
+log_Y = log(Y)
+balance_log_ts<-ts(log_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
+plot.ts(balance_log_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+ndiffs(log_Y)
+adf.test(log_Y)
+acf(log_Y)
+pacf(log_Y)
+
+#difference
+# bc <- boxcox(diff_Y ~ t)
+# plot(bc)
+(lambda <- bc$x[which.max(bc$y)])
+new_model <- lm(((Y^lambda-1)/lambda) ~ t)
+diff_Y <- diff(Y, differences = 1)
+balance_diff_ts<-ts(diff_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
+plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+ndiffs(diff_Y)
+nsdiffs(diff_Y)
+adf.test(diff_Y)
+acf(diff_Y,lag=24)
+pacf(diff_Y,lag=24)
+# install.packages("urca")
+library(urca)
+kpss_test_result <- ur.kpss(balance_ts, type = "tau")
+kpss_test_result
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############dont see below
 # Check different
 ndiffs(Y)
 nsdiffs(Y)
