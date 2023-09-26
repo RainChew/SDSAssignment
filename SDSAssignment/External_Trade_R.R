@@ -74,6 +74,8 @@ pacf(trade_ts)
 
 # If Trade_Balance are
 Y <- df$Trade_Balance
+acf(Y,lag=24)
+pacf(Y,lag=24)
 summary(Y)
 balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
 #Check and Remove Outliers
@@ -85,6 +87,7 @@ plot.ts(balance_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = 
 adf.test(balance_ts)
 acf(balance_ts, lag=24, col = "blue")
 pacf(balance_ts , lag=24 , col = "blue")
+summary(balance_ts)
 ?acf
 ?pacf
 rolling_var <- rollapply(balance_ts, width = 12, FUN = var, by = 1, align = "right", fill = NA)
@@ -93,7 +96,6 @@ decomposed <- decompose(balance_ts)
 # Step 2: Analyze Trend
 # Extract the trend component from decomposition
 trend_component <- decomposed$trend
-
 # Plot the trend component
 autoplot(trend_component, ylab = "Trend", main = "Trend Component")
 
@@ -174,8 +176,16 @@ pacf(log_Y)
 # plot(bc)
 (lambda <- bc$x[which.max(bc$y)])
 new_model <- lm(((Y^lambda-1)/lambda) ~ t)
-diff_Y <- diff(Y, differences = 1)
+diff_Y <- diff(Y, differences = 1,lag=12)
 balance_diff_ts<-ts(diff_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
+plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+acf(diff_Y,lag=24)
+pacf(diff_Y,lag=24)
+ndiffs(diff_Y)
+nsdiffs(diff_Y)
+diff_Y <- diff(Y, differences = 1)
+acf(diff_Y)
+pacf(diff_Y)
 plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 ndiffs(diff_Y)
 nsdiffs(diff_Y)
