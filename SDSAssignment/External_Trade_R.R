@@ -3,6 +3,8 @@ library(ggplot2)
 library(ggfortify)
 library(MASS)
 library(tseries)
+library(zoo)
+library(urca)
 
 
 #step 0 - Read Dataset
@@ -40,6 +42,8 @@ df_ts<-ts(df, frequency = 12, start=c(2010,1), end=c(2019,12))
 plot.ts(df_ts, xlab = "Year", main = "Monthly External Trade Data(RM)" )
 #t is Date
 t <- df$date
+#---------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------
 # If Gross_Exports are 
 Y <- df$Gross_Exports
 export_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
@@ -71,6 +75,10 @@ plot.ts(trade_ts, ylab = "Total Trade(RM)(millions)", xlab = "Date", main = "Mon
 adf.test(trade_ts)
 acf(trade_ts)
 pacf(trade_ts)
+#-------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------
+
+
 
 # If Trade_Balance are
 Y <- df$Trade_Balance
@@ -90,6 +98,7 @@ pacf(balance_ts , lag=24 , col = "blue")
 summary(balance_ts)
 ?acf
 ?pacf
+# Rolling variance
 rolling_var <- rollapply(balance_ts, width = 12, FUN = var, by = 1, align = "right", fill = NA)
 plot(rolling_var, ylab = "Rolling Variance", xlab = "Date", main = "Rolling Variance")
 decomposed <- decompose(balance_ts)
@@ -118,14 +127,12 @@ cbind(decomposed$x,decomposed$trend,decomposed$seasonal,decomposed$random)
 acf(residual_component)
 pacf(residual_component)
 # Calculate a simple moving average
-# Load the zoo package
-library(zoo)
-
 # Calculate a simple moving average
 ma <- rollmean(balance_ts, k = 12, fill = NA, align = "right")
 
 # Plot the moving average
 plot(ma, main = "Moving Average of Time Series Data")
+# initialize balance_ts to Y
 Y <- balance_ts
 plot.ts(Y, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 ndiffs(Y)
@@ -134,6 +141,7 @@ acf(Y,lag=24)
 pacf(Y,lag=24)
 auto.arima(Y,ic="aic", trace=TRUE)
 checkresiduals(Y,lag = 24)
+#Non Ramdoness
 # Test trend
 # Load necessary libraries
 library(randtests)
@@ -147,10 +155,13 @@ summary(Y)
 cox_stuart_test_result <- cox.stuart.test(Y)
 summary(cox_stuart_test_result)
 print(cox_stuart_test_result)
+#R
 library(Kendall)
 
 mk_test_result <- MannKendall(Y)
 print(mk_test_result)
+#not trend
+
 #Differencing
 ndiffs(Y)
 nsdiffs(Y)
@@ -176,13 +187,39 @@ pacf(log_Y)
 # plot(bc)
 (lambda <- bc$x[which.max(bc$y)])
 new_model <- lm(((Y^lambda-1)/lambda) ~ t)
+
+#seasonal differencing
 diff_Y <- diff(Y, differences = 1,lag=12)
 balance_diff_ts<-ts(diff_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
 plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-acf(diff_Y,lag=24)
-pacf(diff_Y,lag=24)
+acf(diff_Y,lag=40)
+pacf(diff_Y,lag=40)
+adf.test(diff_Y)
+auto.arima(diff_Y, ic="aic", trace=TRUE)
 ndiffs(diff_Y)
 nsdiffs(diff_Y)
+kpss_test_result <- ur.kpss(balance_ts, type = "tau")
+kpss_test_result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------------------------------------------------------------
+#non seasonal differencing 
 diff_Y <- diff(Y, differences = 1)
 acf(diff_Y)
 pacf(diff_Y)
