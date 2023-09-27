@@ -100,7 +100,7 @@ pacf(Y,lag=24)
 Y_train<-window(Y, start=c(1972,1), end=c(2017,12))
 Y_test<-window(Y, start=c(2018,1))
 
-balance_ts<-ts(Y_train, frequency = 12, start=c(2010,1)
+balance_ts<-ts(Y_train, frequency = 12, start=c(2010,1))
 #Check and Remove Outliers
 balance_ts_clean = tsclean(balance_ts)
 summary(balance_ts_clean)
