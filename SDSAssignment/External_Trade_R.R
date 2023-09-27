@@ -6,7 +6,6 @@ library(tseries)
 library(zoo)
 library(urca)
 
-
 #step 0 - Read Dataset
 df <- read.csv("External_Trade_Monthly.csv")
 head(df)
@@ -19,7 +18,6 @@ df$date<-as.Date(df$date, format="%m/%d/%Y")
 #view again to check character convert to date format
 summary(df)
 str(df)
-
 
 #numeric
 df$Gross_Exports <- as.numeric(gsub(",", "", df$Gross_Exports))
@@ -42,456 +40,126 @@ df_ts<-ts(df, frequency = 12, start=c(2010,1), end=c(2019,12))
 plot.ts(df_ts, xlab = "Year", main = "Monthly External Trade Data(RM)" )
 #t is Date
 t <- df$date
-#---------------------------------------------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------------------------------------------
-# If Gross_Exports are 
-Y <- df$Gross_Exports
-export_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(export_ts, ylab = "Gross Exports(RM)(millions)", xlab = "Date", main = "Monthly Gross Exports(RM)")
-# Check stationary using raw dataset (adf,acf,pacf)
-adf.test(export_ts)
-acf(export_ts)
-pacf(export_ts)
-decomposed <- decompose(df_ts)
-
-# If Gross_Imports are 
-Y <- df$Gross_Imports
-import_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(import_ts, ylab = "Gross Imports(RM)(millions)", xlab = "Date", main = "Monthly Gross Imports(RM)")
-# Check stationary using raw dataset (adf,acf,pacf)
-adf.test(import_ts)
-acf(import_ts)
-pacf(import_ts)
-decomposed <- decompose(import_ts)
-
-# Plot the decomposed components
-autoplot(decomposed, main = "Decomposed Components of Time Series")
-
-# If Total_Trade are 
-Y <- df$Total_Trade
-trade_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(trade_ts, ylab = "Total Trade(RM)(millions)", xlab = "Date", main = "Monthly Total Trade(RM)")
-# Check stationary using raw dataset (adf,acf,pacf)
-adf.test(trade_ts)
-acf(trade_ts)
-pacf(trade_ts)
-#-------------------------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------------------------
-
-
-
-# If Trade_Balance are
 Y <- df$Trade_Balance
 acf(Y,lag=24)
 pacf(Y,lag=24)
-# # Load the TSstudio package
-# library(TSstudio)
-# 
-# # Split the data into training and test sets
-# split_Y <- ts_split(ts.obj = USgas, sample.out = 12)
-# Y_train <- split_Y$train
-# Y_test <- split_Y$test
-# summary(Y_train)
-# print(Y)
-# print(Y_train)
+Y_ts<-ts(Y, frequency = 12, start=c(2010,1))
+plot.ts(Y_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 #Split data
-
-#Split data
-Y_train<-window(Y, start=c(1972,1), end=c(2017,12))
-Y_test<-window(Y, start=c(2018,1))
-
-balance_ts<-ts(Y_train, frequency = 12, start=c(2010,1))
-#Check and Remove Outliers
-balance_ts_clean = tsclean(balance_ts)
-summary(balance_ts_clean)
-summary(balance_ts)
-plot.ts(balance_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+Y_train<-window(Y_ts, start=c(2010,1),end=c(2017,12))
+Y_test<-window(Y_ts, start=c(2018,1))
+plot.ts(Y_train, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 # Check stationary using raw dataset (adf,acf,pacf)
-adf.test(balance_ts)
-acf(balance_ts, lag=24, col = "blue")
-pacf(balance_ts , lag=24 , col = "blue")
-summary(balance_ts)
-?acf
-?pacf
-# Rolling variance
-rolling_var <- rollapply(balance_ts, width = 12, FUN = var, by = 1, align = "right", fill = NA)
-plot(rolling_var, ylab = "Rolling Variance", xlab = "Date", main = "Rolling Variance")
-decomposed <- decompose(balance_ts)
-# Step 2: Analyze Trend
-# Extract the trend component from decomposition
-trend_component <- decomposed$trend
-# Plot the trend component
-autoplot(trend_component, ylab = "Trend", main = "Trend Component")
+# Examine the distribution 
+hist(Y_train, main = "Histogram of Trade Balance(RM)", xlab = "Trade Balance(RM)")
 
-# Step 3: Analyze Seasonality
-# Extract the seasonal component from decomposition
-seasonal_component <- decomposed$seasonal
-# Plot the seasonal component
-autoplot(seasonal_component, ylab = "Seasonal Component", main = "Seasonal Component")
-decomposition <- decompose(balance_ts, type = "multiplicative")
-plot(decomposition)
-decomposition <- decompose(balance_ts, type = "additive")
-plot(decomposition)
-# Step 4: Analyze Residuals (Random Behavior)
-# Extract the residual component from decomposition
-residual_component <- decomposed$random
-# Plot the residuals
-autoplot(residual_component, ylab = "Residuals", main = "Residuals (Random Behavior)")
-cbind(decomposed$x,decomposed$trend,decomposed$seasonal,decomposed$random)
-# You can also plot ACF and PACF of residuals to identify any autocorrelation
-acf(residual_component)
-pacf(residual_component)
-# Calculate a simple moving average
-# Calculate a simple moving average
-ma <- rollmean(balance_ts, k = 12, fill = NA, align = "right")
+# Box plot
+boxplot(Y_train, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
+adf.test(Y_train)
+acf(Y_train, lag=24, col = "blue")
+pacf(Y_train , lag=24 , col = "blue")
+checkresiduals(Y_train)
+summary(Y_train)
 
-# Plot the moving average
-plot(ma, main = "Moving Average of Time Series Data")
-# initialize balance_ts to Y
-Y <- balance_ts
-plot.ts(Y, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-ndiffs(Y)
-nsdiffs(Y)
-acf(Y,lag=24)
-pacf(Y,lag=24)
-auto.arima(Y,ic="aic", trace=TRUE)
-checkresiduals(Y,lag = 24)
-#Non Ramdoness
-# Test trend
-# Load necessary libraries
-library(randtests)
+ts_data <- ts(Y_train, frequency = 12)  # Assuming monthly data (frequency = 12)
+decomposition <- decompose(ts_data)
+plot(decomposition) # Plot the decomposition components (trend, seasonal, and remainder)
 
-# Generate or load your time series data
-# Replace this with your actual time series data
-# For example, you can create a time series using `ts()` or read data from a CSV file.
-# Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
-summary(Y)
-# Perform the Cox-Stuart trend test
-cox_stuart_test_result <- cox.stuart.test(Y)
-summary(cox_stuart_test_result)
-print(cox_stuart_test_result)
-#R
-library(Kendall)
+# Visual Inspection of Trend Component
+plot(decomposition$trend, main = "Trend Component", xlab = "Date", ylab = "Trend")
 
-mk_test_result <- MannKendall(Y)
-print(mk_test_result)
-#not trend
+# Visual Inspection of Seasonal Component
+plot(decomposition$seasonal, main = "Seasonal Component", xlab = "Date", ylab = "Seasonal")
 
-#Differencing
-ndiffs(Y)
-nsdiffs(Y)
-bc <- boxcox(Y ~ t)
-plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
+# Visual Inspection of Residual Component
+plot(decomposition$random, main = "Residual Component", xlab = "Date", ylab = "Residual")
 
-#log
-bc <- boxcox(log_Y ~ t)
-plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
-new_model <- lm(((Y^lambda-1)/lambda) ~ t)
-log_Y = log(Y)
-balance_log_ts<-ts(log_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(balance_log_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-ndiffs(log_Y)
-adf.test(log_Y)
-acf(log_Y)
-pacf(log_Y)
 
-#difference
-# bc <- boxcox(diff_Y ~ t)
-# plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
-new_model <- lm(((Y^lambda-1)/lambda) ~ t)
-
+# # Check Transformation or not
+# skew <- skewness(Y_train)
+# print(skew)
+#Check differencing
+ndiffs(Y_train)
+nsdiffs(Y_train)
+adf.test(Y_train)
 #seasonal differencing
-diff_Y <- diff(Y, differences = 1,lag=12)
-balance_diff_ts<-ts(diff_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-acf(diff_Y,lag=40)
-pacf(diff_Y,lag=40)
-adf.test(diff_Y)
-auto.arima(diff_Y, ic="aic", trace=TRUE)
-ndiffs(diff_Y)
-nsdiffs(diff_Y)
-kpss_test_result <- ur.kpss(balance_ts, type = "tau")
-kpss_test_result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#---------------------------------------------------------------------------------
-#non seasonal differencing 
-diff_Y <- diff(Y, differences = 1)
-acf(diff_Y)
-pacf(diff_Y)
-plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-ndiffs(diff_Y)
-nsdiffs(diff_Y)
-adf.test(diff_Y)
+diff_Y <- diff(Y_train, differences = 1,lag=12)
 acf(diff_Y,lag=24)
 pacf(diff_Y,lag=24)
-# install.packages("urca")
-library(urca)
-kpss_test_result <- ur.kpss(balance_ts, type = "tau")
-kpss_test_result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##############dont see below
-# Check different
-ndiffs(Y)
-nsdiffs(Y)
-bc <- boxcox(Y ~ t)
-plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
-
-
-arima_model <- arima(Y, order = c(1, 1, 0))
-#log
-bc <- boxcox(log_Y ~ t)
-plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
-new_model <- lm(((Y^lambda-1)/lambda) ~ t)
-log_Y = log(Y)
-balance_log_ts<-ts(log_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(balance_log_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-ndiffs(log_Y)
-adf.test(log_Y)
-acf(log_Y)
-pacf(log_Y)
-
-#difference
-# bc <- boxcox(diff_Y ~ t)
-# plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
-new_model <- lm(((Y^lambda-1)/lambda) ~ t)
-diff_Y <- diff(Y, differences = 1)
-balance_diff_ts<-ts(diff_Y, frequency = 12, start=c(2010,1), end=c(2019,12))
-plot.ts(balance_diff_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
-ndiffs(diff_Y)
 adf.test(diff_Y)
-acf(diff_Y)
-pacf(diff_Y)
-# install.packages("urca")
-library(urca)
-kpss_test_result <- ur.kpss(balance_ts, type = "tau")
-kpss_test_result
 
-# Test trend
-# Load necessary libraries
-library(randtests)
+diff_Y <- diff(diff_Y,differences = 1)
+acf(diff_Y,lag=24)
+pacf(diff_Y,lag=24)
+adf.test(diff_Y)
+checkresiduals(diff_Y)
+# STEP 4
+# Model
+# SARIMA
+sarima113212 = arima(x = diff_Y,order= c(1,1,3),seasonal=list(order=c(2,1,2),period=12))
+sarima113212
+summary(sarima113212)
+arima(x = diff_Y, order = c(1, 1, 3), seasonal = list(order = c(2, 1, 2), period = 12))
 
-# Generate or load your time series data
-# Replace this with your actual time series data
-# For example, you can create a time series using `ts()` or read data from a CSV file.
-# Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
-summary(Y)
-summary(diff_Y)
-# Perform the Cox-Stuart trend test
-cox_stuart_test_result <- cox.stuart.test(diff_Y)
-
-# Print the test result
-print(cox_stuart_test_result)
-
-# Load necessary libraries (if not already loaded)
-library(stats)
-
-# Generate or load your time series data
-# Replace this with your actual time series data
-# Example: my_time_series <- ts(your_data, frequency = 12)  # Assuming monthly data
-
-# Fit a linear regression model
-lm_model <- lm(diff_Y ~ time(diff_Y))
-
-# Check the summary of the regression model
-summary(lm_model)
-
-library(Kendall)
-
-mk_test_result <- MannKendall(Y)
-print(mk_test_result)
-# No trend
-
-
-
-
-
-
-
-
-
-
-
-# Assuming your data has a 'Period' column and a 'Trade_Balance column
-
-# Step 0: Split the Data into Train and Test Sets
-
-# Set the proportion of data to be used for training (e.g., 80%)
-train_proportion <- 0.8
-
-# Calculate the number of rows for the training set
-train_rows <- round(nrow(df) * train_proportion)
-
-# Create the training set
-train_data <- df2[1:train_rows, ]
-
-# Create the testing set (validation set)
-test_data <- df2[(train_rows + 1):nrow(df), ]
-
-# Check the dimensions of the train and test sets
-dim(train_data)
-dim(test_data)
-print(train_data)
-
-
-# Assuming you have already imported and prepared your time series data as 'df'
-
-# Step 1: Decompose the Time Series
-#Select Variable y is Trade Balance and x is Period
-y <- df[,c(5)]
-x <- df[,c(1)]
-y <- ts(y, frequency = 12, start = c(2010, 1))
-decomposed <- decompose(y)
-
-# Plot the decomposed components
-autoplot(decomposed, main = "Decomposed Components of Time Series")
-
-# Step 2: Analyze Trend
-# Extract the trend component from decomposition
-trend_component <- decomposed$trend
-
-# Plot the trend component
-autoplot(trend_component, ylab = "Trend", main = "Trend Component")
-
-# Step 3: Analyze Seasonality
-# Extract the seasonal component from decomposition
-seasonal_component <- decomposed$seasonal
-
-# Plot the seasonal component
-autoplot(seasonal_component, ylab = "Seasonal Component", main = "Seasonal Component")
-
-# Step 4: Analyze Residuals (Random Behavior)
-# Extract the residual component from decomposition
-residual_component <- decomposed$random
-
-# Plot the residuals
-autoplot(residual_component, ylab = "Residuals", main = "Residuals (Random Behavior)")
-cbind(decomposed$x,decomposed$trend,decomposed$seasonal,decomposed$random)
-# You can also plot ACF and PACF of residuals to identify any autocorrelation
-acf(residual_component)
-pacf(residual_component)
-
-# determine the time series plot
-df <- ts(df, frequency = 12, start =c(2010,1) ,end = c(2019,12))
-# df <- log(df)
-plot.ts(df, ylab = "Trade Balance(RM)(millions)", xlab = "Period", main = "Monthly Trade Balance(RM)")
-
-
-#show plot
-#y = trade balance
-plot.ts(y, ylab = "Trade Balance(RM)(millions)",xlab="Years", main = "Monthly Trade Balance(RM)")
-
-#adf test
-library(tseries)
-adf.test(y)
-acf(y)
-pacf(y)
-
-#step 2
-# Fit a linear regression model
-model <- lm(Y ~ x)
-
-# Find optimal lambda for Box-Cox transformation
-library(MASS)
-bc <- boxcox(Y ~ x)
-plot(bc)
-(lambda <- bc$x[which.max(bc$y)])
-
-# Perform the Box-Cox transformation on y
-transformed_y <- (y^lambda - 1) / lambda
-
-# Fit a new linear regression model using the transformed y
-new_model <- lm(transformed_y ~ x)
-#step3 
-library(tseries)
-ndiffs(y,alpha=0.05,test="adf")
-
-# Apply non-seasonal differencing
-differenced_y <- diff(y, differences = 1)
-ndiffs(differenced_y)
-
-# Plot the differenced series
-plot.ts(differenced_y, ylab = "Differenced Trade Balance(RM)(millions)", xlab = "Years", main = "Differenced Trade Balance(RM)(2010-2019)")
-
-# Perform Augmented Dickey-Fuller test to check for stationarity
-adf.test_result <- adf.test(differenced_y)
-print(adf.test_result)
-
-#arima
-arima_model <- auto.arima(differenced_y)
-checkresiduals(arima_model)
-print(arima_model)
-
-#sarima 
-sarima_model <- auto.arima(differenced_y, seasonal = TRUE)
-print(sarima_model)
-checkresiduals(sarima_model)
-adf.test(differenced_y)
-acf(differenced_y)
-pacf(differenced_y)
-
-#ets
-ets_model<-ets(differenced_y)
-summary(ets_model)
-checkresiduals(ets_model)
-autoplot(ets_model)
-
-#step 7
-library(forecast)
-fit <- auto.arima(Y)
+# Coefficients:
+#   ar1      ma1      ma2     ma3     sar1     sar2     sma1
+# -0.7887  -0.9465  -0.3730  0.3205  -1.2558  -0.2576  -0.0234
+# s.e.   0.1729   0.2231   0.3235  0.1722   0.1675   0.1661   0.2348
+# sma2
+# -0.9702
+# s.e.   0.2326
+# 
+# sigma^2 estimated as 8495759:  log likelihood = -679.69,  aic = 1377.37
+# 
+# Training set error measures:
+#                 ME    RMSE     MAE     MPE     MAPE      MASE
+# Training set 85.41577 2676.77 2043.34 103.851 193.1698 0.3890106
+# ACF1
+# Training set 0.01247446
+checkresiduals(sarima113212)
+# Q* = 19.281, df = 9, p-value = 0.02291
+fit <- auto.arima(diff_Y)
 summary(fit)
-auto.arima(Y, ic="aic", trace=TRUE)
+auto.arima(diff_Y,ic = "aic",trace = TRUE)
+# Best model: ARIMA(2,0,1)(2,0,0)[12]
+library(lmtest)
+coeftest(sarima113212)
+aic_value <- AIC(sarima113212)
+aic_value
+
+sarima_model <- arima(diff_Y, order = c(2, 0, 1), seasonal = list(order = c(2, 0, 0), period = 12))
+summary(sarima_model)
+# ME     RMSE      MAE      MPE     MAPE      MASE
+# Training set -9.181547 2568.978 2090.757 5.333185 284.1119 0.3980378
+# ACF1
+# Training set 0.01480649
+Box.test(resid(fit),lag=24,type = c("Ljung-Box"))
+# Box-Ljung test
+# 
+# data:  resid(fit)
+# X-squared = 23.102, df = 24, p-value = 0.5138
+coeftest(fit)
+acf(residuals(sarima_model))
+pacf(residuals(sarima_model))
+
+sarima_forecasts <- forecast(sarima_model, h = length(Y_test))
+accuracy_metrics <- accuracy(sarima_forecasts, Y_test)
+print(accuracy_metrics)
+# Plot the SARIMA forecasts and actual data
+plot(sarima_forecasts, main = "SARIMA Forecast vs. Actual")
+lines(Y_test, col = "red")
+legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
+
+
+# ETS Model
+# ETS 
+fit <- ets(diff_Y)
+summary(fit)
 autoplot(fit)
-adf.test(Y)
-acf(Y)
-pacf(Y)
+library(stats)
+fit1 <- ets(Y_train, model="ANN", alpha=1e-04)
+summary(fit1)
+accuracy(forecast(fit1), Y_test)
+fit2 <- ets(Y_test, model = fit1)
+Box.test(fit2$residuals, type="Ljung", lag=24)
+accuracy(fit2)
