@@ -76,8 +76,23 @@ pacf(trade_ts)
 Y <- df$Trade_Balance
 acf(Y,lag=24)
 pacf(Y,lag=24)
-summary(Y)
-balance_ts<-ts(Y, frequency = 12, start=c(2010,1), end=c(2019,12))
+# # Load the TSstudio package
+# library(TSstudio)
+# 
+# # Split the data into training and test sets
+# split_Y <- ts_split(ts.obj = USgas, sample.out = 12)
+# Y_train <- split_Y$train
+# Y_test <- split_Y$test
+# summary(Y_train)
+# print(Y)
+# print(Y_train)
+#Split data
+
+#Split data
+Y_train<-window(Y, start=c(1972,1), end=c(2017,12))
+Y_test<-window(Y, start=c(2018,1))
+
+balance_ts<-ts(Y_train, frequency = 12, start=c(2010,1)
 #Check and Remove Outliers
 balance_ts_clean = tsclean(balance_ts)
 summary(balance_ts_clean)
