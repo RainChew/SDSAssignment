@@ -98,17 +98,16 @@ checkresiduals(diff_Y)
 # STEP 4
 # Model
 # SARIMA
-sarima113011 = arima(x = diff_Y,order= c(1,1,3),seasonal=list(order=c(0,1,1),period=12))
+sarima113011 = arima(x = Y_train,order= c(1,1,3),seasonal=list(order=c(0,1,1),period=12))
 sarima113011
 summary(sarima113212)
-arima(x = diff_Y, order = c(1, 1, 3), seasonal = list(order = c(0, 1, 1), period = 12))
-
+arima(x = Y_train, order = c(1, 1, 3), seasonal = list(order = c(0, 1, 1), period = 12))
 # Coefficients:
-#   ar1      ma1      ma2     ma3     sar1     sar2     sma1     sma2
-# -0.7887  -0.9465  -0.3730  0.3205  -1.2558  -0.2576  -0.0234  -0.9702
-# s.e.   0.1729   0.2231   0.3235  0.1722   0.1675   0.1661   0.2348   0.2326
+#   ar1      ma1      ma2     ma3     sma1
+# -0.7454  -0.8819  -0.3899  0.2718  -1.0000
+# s.e.   0.2022   0.2414   0.3465  0.1831   0.1479
 # 
-# sigma^2 estimated as 8495759:  log likelihood = -679.69,  aic = 1377.37
+# sigma^2 estimated as 11969579:  log likelihood = -685.13,  aic = 1382.26
 # 
 # Training set error measures:
 #   ME    RMSE     MAE     MPE     MAPE      MASE       ACF1
@@ -121,9 +120,9 @@ checkresiduals(sarima113011)
 # Q* = 33.145, df = 12, p-value = 0.0009188
 # 
 # Model df: 5.   Total lags used: 17fit <- auto.arima(diff_Y)
-fit_sarima <-auto.arima(diff_Y,ic = "aic",trace = TRUE)
+fit_sarima <-auto.arima(Y_train,ic = "aic",trace = TRUE)
 summary(fit_sarima)
-auto.arima(diff_Y,ic = "aic",trace = TRUE)
+auto.arima(Y_train,ic = "aic",trace = TRUE)
 # Best model: ARIMA(2,0,1)(2,0,0)[12]
 library(lmtest)
 coeftest(sarima113011)
@@ -166,7 +165,7 @@ legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty
 
 # ETS Model
 # ETS 
-fit <- ets(diff_Y)
+fit <- ets(Y_train)
 fit
 summary(fit)
 autoplot(fit)
@@ -179,7 +178,7 @@ plot(forecast(fit))
 # Print the forecasted values
 print(forecast_values)
 library(stats)
-fit1 <- ets(Y_train, model="ANN", alpha=1e-04)
+fit1 <- ets(Y_train, model="ANA", alpha=1e-04)
 summary(fit1)
 accuracy(forecast(fit1), Y_test)
 checkresiduals(fit1)
