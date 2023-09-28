@@ -43,26 +43,32 @@ t <- df$date
 Y <- df$Trade_Balance
 acf(Y,lag=24)
 pacf(Y,lag=24)
-Y_ts<-ts(Y, frequency = 12, start=c(2010,1))
-plot.ts(Y_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+Y<-ts(Y, frequency = 12, start=c(2010,1),end=c(2019,12))
+plot.ts(Y, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+#-----------------------------------------------------
 #Split data
-Y_train<-window(Y_ts, start=c(2010,1),end=c(2017,12))
-Y_test<-window(Y_ts, start=c(2018,1))
+Y_train<-window(Y, start=c(2010,1),end=c(2017,12))
+Y_test<-window(Y, start=c(2018,1))
+
 plot.ts(Y_train, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+#----------------------------------------------
 # Check stationary using raw dataset (adf,acf,pacf)
 # Examine the distribution 
-hist(Y_train, main = "Histogram of Trade Balance(RM)", xlab = "Trade Balance(RM)")
+hist(Y, main = "Histogram of Trade Balance(RM)", xlab = "Trade Balance(RM)")
+
+
+
 
 # Box plot
-boxplot(Y_train, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
-adf.test(Y_train)
-acf(Y_train, lag=24, col = "blue")
-pacf(Y_train , lag=24 , col = "blue")
-checkresiduals(Y_train)
-summary(Y_train)
+boxplot(Y, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
+adf.test(Y)
+acf(Y, lag=24, col = "blue")
+pacf(Y , lag=24 , col = "blue")
+checkresiduals(Y)
+summary(Y)
 
-ts_data <- ts(Y_train, frequency = 12)  # Assuming monthly data (frequency = 12)
-decomposition <- decompose(ts_data)
+# ts_data <- ts(Y, frequency = 12)  # Assuming monthly data (frequency = 12)
+decomposition <- decompose(Y)
 plot(decomposition) # Plot the decomposition components (trend, seasonal, and remainder)
 
 # Visual Inspection of Trend Component
@@ -79,60 +85,60 @@ plot(decomposition$random, main = "Residual Component", xlab = "Date", ylab = "R
 # skew <- skewness(Y_train)
 # print(skew)
 #Check differencing
-ndiffs(Y_train)
-nsdiffs(Y_train)
-adf.test(Y_train)
+ndiffs(Y)
+nsdiffs(Y)
+adf.test(Y)
 #seasonal differencing
-diff_Y <- diff(Y_train , lag=12)
+diff_Y <- diff(Y , lag=12)
 ndiffs(diff_Y)
 nsdiffs(diff_Y)
 acf(diff_Y,lag=24)
 pacf(diff_Y,lag=24)
 adf.test(diff_Y)
 
-diff_Y <- diff(diff_Y,differences = 1)
-acf(diff_Y,lag=24)
-pacf(diff_Y,lag=24)
+# diff_Y <- diff(diff_Y,differences = 1)
+# acf(diff_Y,lag=24)
+# pacf(diff_Y,lag=24)
 adf.test(diff_Y)
 checkresiduals(diff_Y)
 # STEP 4
 # Model
 # SARIMA
-sarima113011 = arima(x = Y_train,order= c(1,1,3),seasonal=list(order=c(0,1,1),period=12))
-sarima113011
-summary(sarima113212)
-arima(x = Y_train, order = c(1, 1, 3), seasonal = list(order = c(0, 1, 1), period = 12))
+sarima102110 = arima(x = Y_train,order= c(1,0,2),seasonal=list(order=c(1,1,0),period=12))
+sarima102110
+summary(sarima102110)
+arima(x = Y_train, order = c(1, 0, 2), seasonal = list(order = c(1, 1, 0), period = 12))
 # Coefficients:
-#   ar1      ma1      ma2     ma3     sma1
-# -0.7454  -0.8819  -0.3899  0.2718  -1.0000
-# s.e.   0.2022   0.2414   0.3465  0.1831   0.1479
+#   ar1     ma1     ma2     sar1
+# -0.3883  0.6172  0.4064  -0.4168
+# s.e.   0.3686  0.3430  0.0937   0.1096
 # 
-# sigma^2 estimated as 11969579:  log likelihood = -685.13,  aic = 1382.26
+# sigma^2 estimated as 7443045:  log likelihood = -785.07,  aic = 1580.14
 # 
 # Training set error measures:
-#   ME    RMSE     MAE     MPE     MAPE      MASE       ACF1
-# Training set 85.41577 2676.77 2043.34 103.851 193.1698 0.3890106 0.01247446t
+#   ME     RMSE      MAE       MPE     MAPE      MASE       ACF1
+# Training set -162.8263 2551.994 1853.701 -21.91583 40.73951 0.7632795 0.02352365
 
-checkresiduals(sarima113011)
+checkresiduals(sarima102110)
 # Ljung-Box test
 # 
 # data:  Residuals from ARIMA(1,1,3)(0,1,1)[12]
 # Q* = 33.145, df = 12, p-value = 0.0009188
 # 
 # Model df: 5.   Total lags used: 17fit <- auto.arima(diff_Y)
-fit_sarima <-auto.arima(Y_train,ic = "aic",trace = TRUE)
+fit_sarima <-auto.arima(Y,ic = "aic",trace = TRUE)
 summary(fit_sarima)
-auto.arima(Y_train,ic = "aic",trace = TRUE)
-# Best model: ARIMA(2,0,1)(2,0,0)[12]
+auto.arima(Y,ic = "aic",trace = TRUE)
+# Best model: ARIMA(2,0,0)(2,0,0)[12]
 library(lmtest)
-coeftest(sarima113011)
-aic_value <- AIC(sarima113011)
+coeftest(sarima102110)
+aic_value <- AIC(sarima102110)
 aic_value
 
 
 
-# sarima_model <- arima(diff_Y, order = c(2, 0, 1), seasonal = list(order = c(2, 0, 0), period = 12))
-# summary(sarima_model)
+fit_sarima <- arima(Y_train, order = c(2, 0, 0), seasonal = list(order = c(2, 0, 0), period = 12))
+summary(fit_sarima)
 # Coefficients:
 #   ar1     ar2      ma1     sar1     sar2
 # 0.1754  0.3523  -0.9544  -0.5711  -0.1981
