@@ -43,26 +43,32 @@ t <- df$date
 Y <- df$Trade_Balance
 acf(Y,lag=24)
 pacf(Y,lag=24)
-Y_ts<-ts(Y, frequency = 12, start=c(2010,1))
-plot.ts(Y_ts, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+Y<-ts(Y, frequency = 12, start=c(2010,1),end=c(2019,12))
+plot.ts(Y, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+#-----------------------------------------------------
 #Split data
-Y_train<-window(Y_ts, start=c(2010,1),end=c(2017,12))
-Y_test<-window(Y_ts, start=c(2018,1))
+Y_train<-window(Y, start=c(2010,1),end=c(2017,12))
+Y_test<-window(Y, start=c(2018,1))
+
 plot.ts(Y_train, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
+#----------------------------------------------
 # Check stationary using raw dataset (adf,acf,pacf)
 # Examine the distribution 
-hist(Y_train, main = "Histogram of Trade Balance(RM)", xlab = "Trade Balance(RM)")
+hist(Y, main = "Histogram of Trade Balance(RM)", xlab = "Trade Balance(RM)")
+
+
+
 
 # Box plot
-boxplot(Y_train, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
-adf.test(Y_train)
-acf(Y_train, lag=24, col = "blue")
-pacf(Y_train , lag=24 , col = "blue")
-checkresiduals(Y_train)
-summary(Y_train)
+boxplot(Y, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
+adf.test(Y)
+acf(Y, lag=24, col = "blue")
+pacf(Y , lag=24 , col = "blue")
+checkresiduals(Y)
+summary(Y)
 
-ts_data <- ts(Y_train, frequency = 12)  # Assuming monthly data (frequency = 12)
-decomposition <- decompose(ts_data)
+# ts_data <- ts(Y, frequency = 12)  # Assuming monthly data (frequency = 12)
+decomposition <- decompose(Y)
 plot(decomposition) # Plot the decomposition components (trend, seasonal, and remainder)
 
 # Visual Inspection of Trend Component
@@ -79,60 +85,59 @@ plot(decomposition$random, main = "Residual Component", xlab = "Date", ylab = "R
 # skew <- skewness(Y_train)
 # print(skew)
 #Check differencing
-ndiffs(Y_train)
-nsdiffs(Y_train)
-adf.test(Y_train)
+ndiffs(Y)
+nsdiffs(Y)
+adf.test(Y)
 #seasonal differencing
-diff_Y <- diff(Y_train , lag=12)
+diff_Y <- diff(Y , lag=12)
 ndiffs(diff_Y)
 nsdiffs(diff_Y)
 acf(diff_Y,lag=24)
 pacf(diff_Y,lag=24)
 adf.test(diff_Y)
 
-diff_Y <- diff(diff_Y,differences = 1)
-acf(diff_Y,lag=24)
-pacf(diff_Y,lag=24)
+# diff_Y <- diff(diff_Y,differences = 1)
+# acf(diff_Y,lag=24)
+# pacf(diff_Y,lag=24)
 adf.test(diff_Y)
 checkresiduals(diff_Y)
 # STEP 4
 # Model
 # SARIMA
-sarima113011 = arima(x = Y_train,order= c(1,1,3),seasonal=list(order=c(0,1,1),period=12))
-sarima113011
-summary(sarima113212)
-arima(x = Y_train, order = c(1, 1, 3), seasonal = list(order = c(0, 1, 1), period = 12))
+sarima102110 = arima(x = Y_train,order= c(1,0,2),seasonal=list(order=c(1,1,0),period=12))
+sarima102110
+summary(sarima102110)
+arima(x = Y_train, order = c(1, 0, 2), seasonal = list(order = c(1, 1, 0), period = 12))
 # Coefficients:
-#   ar1      ma1      ma2     ma3     sma1
-# -0.7454  -0.8819  -0.3899  0.2718  -1.0000
-# s.e.   0.2022   0.2414   0.3465  0.1831   0.1479
+#   ar1     ma1     ma2     sar1
+# -0.3883  0.6172  0.4064  -0.4168
+# s.e.   0.3686  0.3430  0.0937   0.1096
 # 
-# sigma^2 estimated as 11969579:  log likelihood = -685.13,  aic = 1382.26
+# sigma^2 estimated as 7443045:  log likelihood = -785.07,  aic = 1580.14
 # 
 # Training set error measures:
-#   ME    RMSE     MAE     MPE     MAPE      MASE       ACF1
-# Training set 85.41577 2676.77 2043.34 103.851 193.1698 0.3890106 0.01247446t
+#   ME     RMSE      MAE       MPE     MAPE      MASE       ACF1
+# Training set -162.8263 2551.994 1853.701 -21.91583 40.73951 0.7632795 0.02352365
 
-checkresiduals(sarima113011)
+checkresiduals(sarima102110)
+coeftest(sarima102110)
+aic_value <- AIC(sarima102110)
+aic_value
 # Ljung-Box test
 # 
 # data:  Residuals from ARIMA(1,1,3)(0,1,1)[12]
 # Q* = 33.145, df = 12, p-value = 0.0009188
 # 
 # Model df: 5.   Total lags used: 17fit <- auto.arima(diff_Y)
-fit_sarima <-auto.arima(Y_train,ic = "aic",trace = TRUE)
+fit_sarima <-auto.arima(Y,ic = "aic",trace = TRUE)
 summary(fit_sarima)
-auto.arima(Y_train,ic = "aic",trace = TRUE)
+auto.arima(Y,ic = "aic",trace = TRUE)
 # Best model: ARIMA(2,0,1)(2,0,0)[12]
 library(lmtest)
-coeftest(sarima113011)
-aic_value <- AIC(sarima113011)
-aic_value
 
 
-
-# sarima_model <- arima(diff_Y, order = c(2, 0, 1), seasonal = list(order = c(2, 0, 0), period = 12))
-# summary(sarima_model)
+fit_sarima <- arima(Y_train, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
+summary(fit_sarima)
 # Coefficients:
 #   ar1     ar2      ma1     sar1     sar2
 # 0.1754  0.3523  -0.9544  -0.5711  -0.1981
@@ -175,32 +180,55 @@ checkresiduals(fit)
 forecast<-forecast(fit)
 forecast
 plot(forecast(fit))
+plot(forecast(fit),main = "ETS Forecast vs. Actual")
+lines(Y_test, col = "red")
+legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 # Print the forecasted values
 print(forecast_values)
 library(stats)
-fit1 <- ets(Y_train, model="ANA", alpha=1e-04)
+fit1 <- ets(Y_train, model="ANA", alpha=0.3151,gamma=1e-04)
 summary(fit1)
 accuracy(forecast(fit1), Y_test)
 checkresiduals(fit1)
-plot(forecast(fit1))
+ets_forecast = forecast(fit1)
+plot(ets_forecast)
+plot(ets_forecasts, main = "ETS Forecast vs. Actual")
+lines(Y_test, col = "red")
+legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 
-# simple exponential smoothing
+# Hot Winter Addictive Models
 # Estimating the level of time series using simple exponential
-es1 <- HoltWinters(diff_Y, alpha=1e-04, beta=FALSE, gamma=FALSE)
-es1
-plot(es1)
+decompose = decompose(Y)
+plot(decompose)
+#Holt-Winter Additive Method
+library(forecast)
+hw <- HoltWinters(Y_train ,seasonal = "additive")
+hw
+plot(hw)
 
-# Call SSE and calculate the MSE
-es1$SSE
-MSE <- es1$"SSE"/(length(diff_Y))
+MSE <- hw$"SSE"/((NROW(Y)-3))
 MSE
 
-# Check randomness of the residuals
-checkresiduals(es1)
+checkresiduals(hw)
 
-# Computes predictions and prediction intervals
-forecast <- predict(es1, n.ahead=10, prediction.interval=T,
+forecast <- predict(object=hw, n.ahead=24, prediction.interval=T,
                     level=.95)
 forecast
-plot(es1,forecast)
+plot(hw,forecast)
+#Holt-Winter Multiplicative Method
+library(forecast)
+hw2 <- HoltWinters(Y_train ,seasonal = "multiplicative")
+hw2
+plot(hw2)
+
+MSE <- hw2$"SSE"/(NROW(Y)-3)
+MSE
+
+checkresiduals(hw2)
+
+forecast <- predict(object=hw2, n.ahead=24, prediction.interval=T,
+                    level=.95)
+?predict
+forecast
+plot(hw2,forecast)
 
