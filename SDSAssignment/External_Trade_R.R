@@ -120,6 +120,9 @@ arima(x = Y_train, order = c(1, 0, 2), seasonal = list(order = c(1, 1, 0), perio
 # Training set -162.8263 2551.994 1853.701 -21.91583 40.73951 0.7632795 0.02352365
 
 checkresiduals(sarima102110)
+coeftest(sarima102110)
+aic_value <- AIC(sarima102110)
+aic_value
 # Ljung-Box test
 # 
 # data:  Residuals from ARIMA(1,1,3)(0,1,1)[12]
@@ -129,15 +132,11 @@ checkresiduals(sarima102110)
 fit_sarima <-auto.arima(Y,ic = "aic",trace = TRUE)
 summary(fit_sarima)
 auto.arima(Y,ic = "aic",trace = TRUE)
-# Best model: ARIMA(2,0,0)(2,0,0)[12]
+# Best model: ARIMA(2,0,1)(2,0,0)[12]
 library(lmtest)
-coeftest(sarima102110)
-aic_value <- AIC(sarima102110)
-aic_value
 
 
-
-fit_sarima <- arima(Y_train, order = c(2, 0, 0), seasonal = list(order = c(2, 0, 0), period = 12))
+fit_sarima <- arima(Y_train, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
 summary(fit_sarima)
 # Coefficients:
 #   ar1     ar2      ma1     sar1     sar2
@@ -181,32 +180,55 @@ checkresiduals(fit)
 forecast<-forecast(fit)
 forecast
 plot(forecast(fit))
+plot(forecast(fit),main = "ETS Forecast vs. Actual")
+lines(Y_test, col = "red")
+legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 # Print the forecasted values
 print(forecast_values)
 library(stats)
-fit1 <- ets(Y_train, model="ANA", alpha=1e-04)
+fit1 <- ets(Y_train, model="ANA", alpha=0.3151,gamma=1e-04)
 summary(fit1)
 accuracy(forecast(fit1), Y_test)
 checkresiduals(fit1)
-plot(forecast(fit1))
+ets_forecast = forecast(fit1)
+plot(ets_forecast)
+plot(ets_forecasts, main = "ETS Forecast vs. Actual")
+lines(Y_test, col = "red")
+legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 
-# simple exponential smoothing
+# Hot Winter Addictive Models
 # Estimating the level of time series using simple exponential
-es1 <- HoltWinters(diff_Y, alpha=1e-04, beta=FALSE, gamma=FALSE)
-es1
-plot(es1)
+decompose = decompose(Y)
+plot(decompose)
+#Holt-Winter Additive Method
+library(forecast)
+hw <- HoltWinters(Y_train ,seasonal = "additive")
+hw
+plot(hw)
 
-# Call SSE and calculate the MSE
-es1$SSE
-MSE <- es1$"SSE"/(length(diff_Y))
+MSE <- hw$"SSE"/((NROW(Y)-3))
 MSE
 
-# Check randomness of the residuals
-checkresiduals(es1)
+checkresiduals(hw)
 
-# Computes predictions and prediction intervals
-forecast <- predict(es1, n.ahead=10, prediction.interval=T,
+forecast <- predict(object=hw, n.ahead=24, prediction.interval=T,
                     level=.95)
 forecast
-plot(es1,forecast)
+plot(hw,forecast)
+#Holt-Winter Multiplicative Method
+library(forecast)
+hw2 <- HoltWinters(Y_train ,seasonal = "multiplicative")
+hw2
+plot(hw2)
+
+MSE <- hw2$"SSE"/(NROW(Y)-3)
+MSE
+
+checkresiduals(hw2)
+
+forecast <- predict(object=hw2, n.ahead=24, prediction.interval=T,
+                    level=.95)
+?predict
+forecast
+plot(hw2,forecast)
 
