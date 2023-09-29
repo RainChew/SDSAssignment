@@ -112,10 +112,11 @@ checkresiduals(diff_Y)
 # STEP 4
 # Model
 # SARIMA
-sarima102110 = arima(x = Y_train,order= c(1,0,2),seasonal=list(order=c(1,1,1),period=12))
-sarima102110
-summary(sarima102110)
-sarima_forecasts <- forecast(sarima102110, h = length(Y_test))
+sarima102111 = arima(x = Y_train,order= c(1,0,2),seasonal=list(order=c(1,1,1),period=12))
+sarima102111
+summary(sarima102111)
+accuracy(sarima102111)
+sarima_forecasts <- forecast(sarima102111, h = length(Y_test))
 accuracy_metrics <- accuracy(sarima_forecasts, Y_test)
 print(accuracy_metrics)
 # Plot the SARIMA forecasts and actual data
@@ -134,9 +135,9 @@ arima(x = Y_train, order = c(1, 0, 2), seasonal = list(order = c(1, 1, 0), perio
 #   ME     RMSE      MAE       MPE     MAPE      MASE       ACF1
 # Training set -162.8263 2551.994 1853.701 -21.91583 40.73951 0.7632795 0.02352365
 
-checkresiduals(sarima102110)
-coeftest(sarima102110)
-aic_value <- AIC(sarima102110)
+checkresiduals(sarima102111)
+coeftest(sarima102111)
+aic_value <- AIC(sarima102111)
 aic_value
 # Ljung-Box test
 # 
@@ -153,6 +154,7 @@ library(lmtest)
 
 fit_sarima <- arima(Y_train, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
 summary(fit_sarima)
+
 # Coefficients:
 #   ar1     ar2      ma1     sar1     sar2
 # 0.1754  0.3523  -0.9544  -0.5711  -0.1981
@@ -174,6 +176,7 @@ coeftest(fit_sarima)
 acf(residuals(fit_sarima))
 pacf(residuals(fit_sarima))
 checkresiduals(fit_sarima)
+AIC(fit_sarima)
 
 sarima_forecasts <- forecast(fit_sarima, h = length(Y_test))
 accuracy_metrics <- accuracy(sarima_forecasts, Y_test)
@@ -220,7 +223,7 @@ library(forecast)
 hw <- HoltWinters(Y_train ,seasonal = "additive")
 hw
 plot(hw)
-
+summary(forecast(hw))
 MSE <- hw$"SSE"/((NROW(Y)-3))
 MSE
 
@@ -235,7 +238,7 @@ library(forecast)
 hw2 <- HoltWinters(Y_train ,seasonal = "multiplicative")
 hw2
 plot(hw2)
-
+summary(forecast(hw2))
 MSE <- hw2$"SSE"/(NROW(Y)-3)
 MSE
 
