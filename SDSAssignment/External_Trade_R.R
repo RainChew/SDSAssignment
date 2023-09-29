@@ -1,3 +1,5 @@
+install.packages("lmtest")
+
 library(forecast)
 library(ggplot2)
 library(ggfortify)
@@ -6,6 +8,7 @@ library(tseries)
 library(zoo)
 library(urca)
 library(randtests)
+library(lmtest)
 
 
 #step 0 - Read Dataset
@@ -202,7 +205,8 @@ plot(forecast(fit),main = "ETS Forecast vs. Actual")
 lines(Y_test, col = "red")
 legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 # Print the forecasted values
-print(forecast_values)
+print(forecast)
+
 library(stats)
 fit1 <- ets(Y_train, model="ANA", alpha=0.3151,gamma=1e-04)
 summary(fit1)
