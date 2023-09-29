@@ -5,6 +5,8 @@ library(MASS)
 library(tseries)
 library(zoo)
 library(urca)
+library(randtests)
+
 
 #step 0 - Read Dataset
 df <- read.csv("External_Trade_Monthly.csv")
@@ -59,14 +61,21 @@ hist(Y, main = "Histogram of Trade Balance(RM)", xlab = "Trade Balance(RM)")
 
 
 
-# Box plot
-boxplot(Y, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
+# # Box plot
+# boxplot(Y, main = "Box Plot of Trade Balance(RM)", ylab = "Trade Balance(RM)")
+plot.ts(Y, ylab = "Trade Balance(RM)(millions)", xlab = "Date", main = "Monthly Trade Balance(RM)")
 adf.test(Y)
+Y_test
+kpss_test_result <- ur.kpss(Y, type = "tau")
+kpss_test_result
 acf(Y, lag=24, col = "blue")
 pacf(Y , lag=24 , col = "blue")
 checkresiduals(Y)
+# Perform the Cox-Stuart trend test
+cox_stuart_test_result <- cox.stuart.test(Y)
+summary(cox_stuart_test_result)
+print(cox_stuart_test_result)
 summary(Y)
-
 # ts_data <- ts(Y, frequency = 12)  # Assuming monthly data (frequency = 12)
 decomposition <- decompose(Y)
 plot(decomposition) # Plot the decomposition components (trend, seasonal, and remainder)
