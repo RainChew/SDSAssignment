@@ -73,7 +73,6 @@ pacf(Y , lag=24 , col = "blue")
 checkresiduals(Y)
 # Perform the Cox-Stuart trend test
 cox_stuart_test_result <- cox.stuart.test(Y)
-summary(cox_stuart_test_result)
 print(cox_stuart_test_result)
 summary(Y)
 # ts_data <- ts(Y, frequency = 12)  # Assuming monthly data (frequency = 12)
@@ -113,9 +112,16 @@ checkresiduals(diff_Y)
 # STEP 4
 # Model
 # SARIMA
-sarima102110 = arima(x = Y_train,order= c(1,0,2),seasonal=list(order=c(1,1,0),period=12))
+sarima102110 = arima(x = Y_train,order= c(1,0,2),seasonal=list(order=c(1,1,1),period=12))
 sarima102110
 summary(sarima102110)
+sarima_forecasts <- forecast(sarima102110, h = length(Y_test))
+accuracy_metrics <- accuracy(sarima_forecasts, Y_test)
+print(accuracy_metrics)
+# Plot the SARIMA forecasts and actual data
+plot(sarima_forecasts, main = "SARIMA Forecast vs. Actual")
+lines(Y_test, col = "red")
+legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 arima(x = Y_train, order = c(1, 0, 2), seasonal = list(order = c(1, 1, 0), period = 12))
 # Coefficients:
 #   ar1     ma1     ma2     sar1
@@ -141,7 +147,7 @@ aic_value
 fit_sarima <-auto.arima(Y,ic = "aic",trace = TRUE)
 summary(fit_sarima)
 auto.arima(Y,ic = "aic",trace = TRUE)
-# Best model: ARIMA(2,0,1)(2,0,0)[12]
+# Best model: ARIMA(2,1,1)(2,0,0)[12]
 library(lmtest)
 
 
@@ -240,4 +246,5 @@ forecast <- predict(object=hw2, n.ahead=24, prediction.interval=T,
 ?predict
 forecast
 plot(hw2,forecast)
-
+accuracy_metrics <- accuracy(forecast, Y_test)
+accuracy_metrics
