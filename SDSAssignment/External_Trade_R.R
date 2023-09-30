@@ -212,45 +212,52 @@ accuracy(forecast(fit1), Y_test)
 checkresiduals(fit1)
 ets_forecast = forecast(fit1)
 plot(ets_forecast)
-plot(ets_forecasts, main = "ETS Forecast vs. Actual")
+plot(ets_forecast, main = "ETS Forecast vs. Actual")
 lines(Y_test, col = "red")
 legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty = 1)
 
-# Hot Winter Addictive Models
+# Hot Winter Additive Models
 # Estimating the level of time series using simple exponential
 decompose = decompose(Y)
 plot(decompose)
+
 #Holt-Winter Additive Method
 library(forecast)
-hw <- HoltWinters(Y_train ,seasonal = "additive")
-hw
-plot(hw)
-summary(forecast(hw))
-MSE <- hw$"SSE"/((NROW(Y)-3))
+hwAdd <- HoltWinters(Y_train ,seasonal = "additive")
+
+hwAdd
+plot(hwAdd)
+summary(forecast(hwAdd))
+MSE <- hwAdd$"SSE"/((NROW(Y)-3))
 MSE
 
-checkresiduals(hw)
+RMSE <- sqrt(MSE)
+RMSE
+checkresiduals(hwAdd)
 
-forecast <- predict(object=hw, n.ahead=24, prediction.interval=T,
+forecast <- predict(object=hwAdd, n.ahead=24, prediction.interval=T,
                     level=.95)
 forecast
-plot(hw,forecast)
+plot(hwAdd,forecast)
 #Holt-Winter Multiplicative Method
-library(forecast)
-hw2 <- HoltWinters(Y_train ,seasonal = "multiplicative")
-hw2
-plot(hw2)
-summary(forecast(hw2))
-MSE <- hw2$"SSE"/(NROW(Y)-3)
+hwMul <- HoltWinters(Y_train ,seasonal = "multiplicative")
+hwMul
+plot(hwMul)
+summary(forecast(hwMul))
+MSE <- hwMul$"SSE"/(length(Y))
 MSE
-
-checkresiduals(hw2)
-
-forecast <- predict(object=hw2, n.ahead=24, prediction.interval=T,
+RMSE <- sqrt(MSE)
+RMSE
+checkresiduals(hwMul)
+# Print the RMSE
+cat("RMSE:", rmse_value, "\n")
+forecast <- predict(object=hwMul, n.ahead=24, prediction.interval=T,
                     level=.95)
 ?predict
 forecast
-plot(hw2,forecast)
+plot(hwMul,forecast)
 accuracy_metrics <- accuracy(forecast, Y_test)
 accuracy_metrics
 
+
+# TBATS Model
