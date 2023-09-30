@@ -1,5 +1,4 @@
-install.packages("lmtest")
-
+# install.packages("lmtest")
 library(forecast)
 library(ggplot2)
 library(ggfortify)
@@ -152,9 +151,6 @@ fit_sarima <-auto.arima(Y,ic = "aic",trace = TRUE)
 summary(fit_sarima)
 auto.arima(Y,ic = "aic",trace = TRUE)
 # Best model: ARIMA(2,1,1)(2,0,0)[12]
-library(lmtest)
-
-
 fit_sarima <- arima(Y_train, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
 summary(fit_sarima)
 
@@ -194,6 +190,7 @@ legend("topright", legend = c("Forecast", "Actual"), col = c("blue", "red"), lty
 fit <- ets(Y_train)
 fit
 summary(fit)
+accuracy(fit)
 autoplot(fit)
 # Make forecasts
 # forecast_values <- forecast((fit), h = 12)  # Forecast for the next 12 periods
@@ -210,6 +207,7 @@ print(forecast)
 library(stats)
 fit1 <- ets(Y_train, model="ANA", alpha=0.3151,gamma=1e-04)
 summary(fit1)
+
 accuracy(forecast(fit1), Y_test)
 checkresiduals(fit1)
 ets_forecast = forecast(fit1)
@@ -255,3 +253,4 @@ forecast
 plot(hw2,forecast)
 accuracy_metrics <- accuracy(forecast, Y_test)
 accuracy_metrics
+
