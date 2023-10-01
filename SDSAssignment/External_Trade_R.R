@@ -164,7 +164,7 @@ auto.arima(Y,ic = "aic",trace = TRUE)
 library(lmtest)
 
 
-fit_sarima <- arima(Y_train, order = c(1, 0, 2), seasonal = list(order = c(1, 1, 1), period = 12))
+fit_sarima <- arima(Y_train, order = c(2, 1, 1), seasonal = list(order = c(2, 0, 0), period = 12))
 summary(fit_sarima)
 
 # Coefficients:
